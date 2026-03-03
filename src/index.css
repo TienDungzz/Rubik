@@ -1,0 +1,203 @@
+body {
+  margin: 0;
+  overflow: hidden; /* Important for 3D canvas to not scroll */
+  background-color: #050505;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  touch-action: none;
+  color: white;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Base styles for Home page and other overlays */
+.overlay-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(10,10,10,0.9) 0%, rgba(30,30,30,0.9) 100%);
+  z-index: 1000;
+}
+
+.home-title {
+  font-size: 3rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+  background: linear-gradient(90deg, #ff4d4d, #ffff00, #00ff00, #0000ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 5s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.size-selector {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.size-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 1.5rem 2.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.size-btn span {
+  font-size: 0.9rem;
+  font-weight: normal;
+  opacity: 0.7;
+}
+
+.size-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.size-btn:active {
+  transform: translateY(0);
+}
+
+.start-btn {
+  background: linear-gradient(45deg, #00b4db, #0083b0);
+  border: none;
+  color: white;
+  padding: 1rem 3rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 30px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  box-shadow: 0 5px 15px rgba(0, 180, 219, 0.4);
+  transition: all 0.3s ease;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.start-btn.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.start-btn.active:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 180, 219, 0.6);
+}
+
+.start-btn.active:active {
+  transform: scale(0.95);
+}
+
+/* In-game UI */
+#ui-container { 
+  position: absolute; 
+  bottom: 20px; 
+  left: 50%; 
+  transform: translateX(-50%); 
+  width: 95%; 
+  max-width: 450px; 
+  z-index: 10; 
+}
+
+.instruction { 
+  color: rgba(255, 255, 255, 0.6); 
+  text-align: center; 
+  font-size: 13px; 
+  margin-bottom: 10px; 
+  pointer-events: none; 
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8); 
+}
+
+#controls { 
+  display: grid; 
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 8px; 
+}
+
+.btn {
+  background: rgba(255, 255, 255, 0.15); 
+  border: 1px solid rgba(255, 255, 255, 0.3); 
+  color: white; 
+  padding: 12px 0; 
+  font-size: 15px; 
+  font-weight: bold; 
+  border-radius: 8px; 
+  cursor: pointer;
+  backdrop-filter: blur(5px); 
+  -webkit-backdrop-filter: blur(5px); 
+  user-select: none; 
+  -webkit-tap-highlight-color: transparent; 
+  touch-action: manipulation; 
+  transition: all 0.1s ease;
+}
+
+.btn:active { 
+  background: rgba(255, 255, 255, 0.4); 
+  transform: scale(0.95); 
+}
+
+#loading {
+  position: absolute; 
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  color: white; 
+  font-size: 20px; 
+  letter-spacing: 3px; 
+  text-transform: uppercase;
+  z-index: 100; 
+  text-shadow: 0 0 10px rgba(255,255,255,0.5);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 20;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: background 0.2s;
+}
+
+.back-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
