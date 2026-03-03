@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const sizes = [
-    { id: 2, label: '2x2', desc: 'Easy' },
-    { id: 3, label: '3x3', desc: 'Classic' },
-    { id: 4, label: '4x4', desc: 'Hard' }
+    { id: 2, label: '2x2', desc: 'Easy', valid: true },
+    { id: 3, label: '3x3', desc: 'Classic', valid: true },
+    { id: 4, label: '4x4', desc: 'Comming soon', valid: false }
 ];
 
 export default function Home() {
@@ -26,7 +26,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
             >
-                Memory Cube
+                Rubik's Cube
             </motion.h1>
 
             <motion.p
@@ -48,6 +48,7 @@ export default function Home() {
                     <button
                         key={size.id}
                         className="size-btn"
+                        disabled={!size.valid}
                         style={{
                             borderColor: selectedSize === size.id ? '#00b4db' : 'rgba(255,255,255,0.2)',
                             background: selectedSize === size.id ? 'rgba(0, 180, 219, 0.2)' : 'rgba(255,255,255,0.1)',

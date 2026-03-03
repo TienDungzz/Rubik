@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
 
 export default function Play() {
     const mountRef = useRef(null);
@@ -9,20 +9,21 @@ export default function Play() {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [isSolved, setIsSolved] = useState(false);
-    const size = location.state?.size || 3; // Default to 3x3 if accessed directly
-
+    const size = location.state?.size || 3;
     useEffect(() => {
         let frameId;
         let isDisposed = false;
 
-        // --- 1. SETUP CƠ BẢN ---
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x050505, 0.06);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         // Adjust camera distance based on size
         const initialCamZ = size === 2 ? 5 : size === 3 ? 6.5 : 8.5;
-        camera.position.set(initialCamZ * 0.6, initialCamZ * 0.6, initialCamZ);
+        // Place camera showing Front (Z) prominent, and Right (X) / Top (Y) slightly
+        const dist = initialCamZ * 1.3;
+        const initialPosDir = new THREE.Vector3(0.35, 0.35, 1.0).normalize();
+        camera.position.copy(initialPosDir.multiplyScalar(dist));
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -35,10 +36,11 @@ export default function Play() {
             mountRef.current.appendChild(renderer.domElement);
         }
 
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.enablePan = false;
+        const controls = new TrackballControls(camera, renderer.domElement);
+        controls.rotateSpeed = 3.5;
+        controls.noPan = true;
+        controls.noZoom = false;
+        controls.dynamicDampingFactor = 0.1;
         controls.minDistance = 3;
         controls.maxDistance = 20;
 
@@ -71,7 +73,6 @@ export default function Play() {
         floorPlane.receiveShadow = true;
         scene.add(floorPlane);
 
-        // --- 2. VẬT LIỆU ---
         const basicColors = [0xff4d4d, 0xffa500, 0xffffff, 0xffff00, 0x00ff00, 0x0000ff]; // Right, Left, Top, Bottom, Front, Back
 
         const initCube = () => {
@@ -105,9 +106,6 @@ export default function Play() {
                             if (i === 5 && z === boundMin) isExterior = true;
 
                             if (isExterior) {
-                                // Here we can use texture instead of color! Just map UV correctly for sizes > 2 if needed.
-                                // For simplicity, we stick to the original logic of solid colors OR we use textures if we split them.
-                                // The original code used solid colors on the blocks, and Unfold anim showed the full textures.
                                 pieceMaterials.push(new THREE.MeshStandardMaterial({ color: basicColors[i], roughness: 0.2, metalness: 0.05 }));
                             } else {
                                 pieceMaterials.push(new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 }));
@@ -115,7 +113,6 @@ export default function Play() {
                         }
                         const piece = new THREE.Mesh(geometry, pieceMaterials);
                         piece.position.set(x, y, z);
-                        // Save initial quaternion to verify solution
                         piece.userData.initialPosition = new THREE.Vector3(x, y, z);
                         piece.userData.initialQuaternion = piece.quaternion.clone();
 
@@ -125,6 +122,7 @@ export default function Play() {
                 });
             });
             camera.lookAt(cubeGroup.position);
+            scrambleCube(size * 10);
             scrambleCube(1); // Temporary 1 move scramble for testing
         };
         initCube();
@@ -259,6 +257,7 @@ export default function Play() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            controls.handleResize();
         };
         window.addEventListener('resize', handleResize);
 
@@ -269,12 +268,72 @@ export default function Play() {
         };
         window.addEventListener('keydown', handleKeyDown);
 
+        let isDraggingCamera = false;
+        const ptrDown = () => { isDraggingCamera = true; };
+        const ptrUp = () => { isDraggingCamera = false; };
+        renderer.domElement.addEventListener('pointerdown', ptrDown);
+        window.addEventListener('pointerup', ptrUp);
+
         const clock = new THREE.Clock();
         function animate() {
             if (isDisposed) return;
             frameId = requestAnimationFrame(animate);
             const elapsedTime = clock.getElapsedTime();
             starMesh.rotation.y = elapsedTime * 0.02;
+
+            if (!isDraggingCamera) {
+                const axes = [
+                    new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, -1, 0),
+                    new THREE.Vector3(1, 0, 0), new THREE.Vector3(-1, 0, 0),
+                    new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, -1)
+                ];
+
+                // Snap camera up vector to keep vertical alignment
+                let closestUp = axes[0], maxDotUp = -Infinity;
+                axes.forEach(axis => {
+                    const dot = camera.up.dot(axis);
+                    if (dot > maxDotUp) { maxDotUp = dot; closestUp = axis; }
+                });
+                camera.up.lerp(closestUp, 0.08).normalize();
+
+                // Snap camera position vector to isometric corners (showing 3 faces)
+                const currentPos = camera.position.clone();
+                const dist = currentPos.length();
+                if (dist > 0) {
+                    const posDir = currentPos.clone().normalize();
+                    // Create 24 'snapping points' (8 corners, each biased towards one of the 3 faces)
+                    // We want the main face to be prominent (e.g. 1.0) and other two faces slight (e.g. 0.3)
+                    const m = 1.0;   // Main face
+                    const s = 0.35;  // Side/top faces
+
+                    const cornerAxes = [];
+                    // For each of the 6 flat faces, create 4 tilted corners
+                    const signs = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+
+                    // Main face is X (Right/Left)
+                    signs.forEach(([y, z]) => {
+                        cornerAxes.push(new THREE.Vector3(m, y * s, z * s).normalize());
+                        cornerAxes.push(new THREE.Vector3(-m, y * s, z * s).normalize());
+                    });
+                    // Main face is Y (Top/Bottom)
+                    signs.forEach(([x, z]) => {
+                        cornerAxes.push(new THREE.Vector3(x * s, m, z * s).normalize());
+                        cornerAxes.push(new THREE.Vector3(x * s, -m, z * s).normalize());
+                    });
+                    // Main face is Z (Front/Back)
+                    signs.forEach(([x, y]) => {
+                        cornerAxes.push(new THREE.Vector3(x * s, y * s, m).normalize());
+                        cornerAxes.push(new THREE.Vector3(x * s, y * s, -m).normalize());
+                    });
+                    let closestPos = cornerAxes[0], maxDotPos = -Infinity;
+                    cornerAxes.forEach(axis => {
+                        const dot = posDir.dot(axis);
+                        if (dot > maxDotPos) { maxDotPos = dot; closestPos = axis; }
+                    });
+                    posDir.lerp(closestPos, 0.08).normalize();
+                    camera.position.copy(posDir.multiplyScalar(dist));
+                }
+            }
 
             controls.update();
             renderer.render(scene, camera);
@@ -286,6 +345,7 @@ export default function Play() {
             cancelAnimationFrame(frameId);
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('pointerup', ptrUp);
             if (mountRef.current) mountRef.current.removeChild(renderer.domElement);
             // Clean up ThreeJS resources
             scene.children.forEach(child => {
