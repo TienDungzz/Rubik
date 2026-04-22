@@ -223,7 +223,7 @@ body {
 }
 
 /* Responsive Styles for Mobile */
-@media (max-width: 600px) {
+@media (max-width: 551px) {
   .home-title {
     font-size: 2.2rem;
     margin-bottom: 1.5rem;
