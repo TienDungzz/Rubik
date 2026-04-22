@@ -1,6 +1,7 @@
 body {
   margin: 0;
-  overflow: hidden; /* Important for 3D canvas to not scroll */
+  overflow: hidden;
+  /* Important for 3D canvas to not scroll */
   background-color: #050505;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   touch-action: none;
@@ -25,7 +26,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, rgba(10,10,10,0.9) 0%, rgba(30,30,30,0.9) 100%);
+  background: linear-gradient(135deg, rgba(10, 10, 10, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%);
   z-index: 1000;
 }
 
@@ -42,8 +43,13 @@ body {
 }
 
 @keyframes shimmer {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
 }
 
 .size-selector {
@@ -53,6 +59,7 @@ body {
 }
 
 .size-btn {
+  box-sizing: border-box;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
@@ -79,7 +86,7 @@ body {
 .size-btn:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
   border-color: rgba(255, 255, 255, 0.5);
 }
 
@@ -119,75 +126,88 @@ body {
 }
 
 /* In-game UI */
-#ui-container { 
-  position: absolute; 
-  bottom: 20px; 
-  left: 50%; 
-  transform: translateX(-50%); 
-  width: 95%; 
-  max-width: 450px; 
-  z-index: 10; 
+#ui-container {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 450px;
+  z-index: 10;
 }
 
-.instruction { 
-  color: rgba(255, 255, 255, 0.6); 
-  text-align: center; 
-  font-size: 13px; 
-  margin-bottom: 10px; 
-  pointer-events: none; 
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.8); 
+.instruction {
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  font-size: 13px;
+  margin-bottom: 10px;
+  pointer-events: none;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
-#controls { 
-  display: grid; 
-  grid-template-columns: repeat(4, 1fr); 
-  gap: 8px; 
+#controls {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
 .btn {
-  background: rgba(255, 255, 255, 0.15); 
-  border: 1px solid rgba(255, 255, 255, 0.3); 
-  color: white; 
-  padding: 12px 0; 
-  font-size: 15px; 
-  font-weight: bold; 
-  border-radius: 8px; 
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 8px;
   cursor: pointer;
-  backdrop-filter: blur(5px); 
-  -webkit-backdrop-filter: blur(5px); 
-  user-select: none; 
-  -webkit-tap-highlight-color: transparent; 
-  touch-action: manipulation; 
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   transition: all 0.1s ease;
 }
 
-.btn:active { 
-  background: rgba(255, 255, 255, 0.4); 
-  transform: scale(0.95); 
+.btn:active {
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0.95);
 }
 
 #loading {
-  position: absolute; 
-  top: 50%; 
-  left: 50%; 
+  position: absolute;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
-  color: white; 
-  font-size: 20px; 
-  letter-spacing: 3px; 
+  color: white;
+  font-size: 20px;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  z-index: 100; 
-  text-shadow: 0 0 10px rgba(255,255,255,0.5);
+  z-index: 100;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
   animation: pulse 1.5s infinite;
 }
 
-@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
+}
 
 .back-btn {
   position: absolute;
   top: 20px;
   left: 20px;
-  background: rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   padding: 10px 20px;
   border-radius: 8px;
@@ -199,5 +219,52 @@ body {
 }
 
 .back-btn:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive Styles for Mobile */
+@media (max-width: 600px) {
+  .home-title {
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .size-selector {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+  }
+
+  .size-btn {
+    padding: 1rem 1.5rem;
+    font-size: 1.2rem;
+  }
+
+  .start-btn {
+    padding: 0.8rem 2.5rem;
+    font-size: 1.1rem;
+  }
+
+  #ui-container {
+    bottom: 15px;
+    width: 96%;
+    max-width: 100%;
+  }
+
+  #controls {
+    gap: 5px;
+  }
+
+  .btn {
+    padding: 10px 0;
+    font-size: 14px;
+    border-radius: 6px;
+  }
+
+  .instruction {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
 }
